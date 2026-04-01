@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: crm_postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: crm_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - crm_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: crm_rabbitmq
+    ports:
+      - "5672:5672" # Port za komunikaciju
+      - "15672:15672" # Port za vizuelni interfejs (Management UI)
+    networks:
+      - crm_network
+
+volumes:
+  pgdata:
+
+networks:
+  crm_network:
+    driver: bridge
