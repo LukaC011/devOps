@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout kod
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Podesi Java 17
         uses: actions/setup-java@v3
@@ -31,7 +33,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd backend/employee-service
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=117d04e20484f744aac67790b965013df0f8e1ad -Dsonar.organization=Luxuz -Dsonar.host.url=https://sonarcloud.io
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=LukaC011_devOps -Dsonar.organization=Luxuz -Dsonar.host.url=https://sonarcloud.io
 
       - name: Docker Build (Employee Service)
         run: |
