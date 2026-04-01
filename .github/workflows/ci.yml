@@ -29,3 +29,16 @@ jobs:
         run: |
           cd backend/employee-service
           docker build -t employee-service:test .
+
+- name: Build i Test (Employee Service)
+      run: |
+        cd backend/employee-service
+        mvn clean test package
+
+    - name: SonarCloud Scan (Employee Service)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    
+      run: |
+        cd backend/employee-service
+        mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=luxuz123 -Dsonar.organization=Luxuz -Dsonar.host.url=https://sonarcloud.io
