@@ -18,6 +18,6 @@ public class EmployeeControllerTest {
     public void testGetEmployees() throws Exception {
         mockMvc.perform(get("/employees"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("CRM/HRM is working."));
+                .andExpect(content().string("Employee microservice is working."));
     }
 }
