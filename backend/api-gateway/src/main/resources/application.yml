@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: employee-service
+              uri: ${EMPLOYEE_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/employees/**
+              filters:
+                - StripPrefix=1
+            - id: client-service
+              uri: ${CLIENT_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/clients/**
+              filters:
+                - StripPrefix=1
+            - id: task-service
+              uri: ${TASK_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/tasks/**
+              filters:
+                - StripPrefix=1
+            - id: notification-service
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/notifications/**
+              filters:
+                - StripPrefix=1
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
