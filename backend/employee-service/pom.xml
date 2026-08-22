@@ -11,8 +11,8 @@
 	<groupId>com.uris.crmhrm</groupId>
 	<artifactId>employee-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>employee-service</name>
+	<description>Upravljanje zaposlenima</description>
 	<url/>
 	<licenses>
 		<license/>

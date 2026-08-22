@@ -11,8 +11,8 @@
 	<groupId>com.uris.crmhrm</groupId>
 	<artifactId>client-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>client-service</name>
+	<description>Upravljanje klijentima</description>
 	<url/>
 	<licenses>
 		<license/>

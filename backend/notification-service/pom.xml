@@ -11,8 +11,8 @@
 	<groupId>com.uris.crmhrm</groupId>
 	<artifactId>notification-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>notification-service</name>
+	<description>Obrada i evidencija notifikacija</description>
 	<url/>
 	<licenses>
 		<license/>
