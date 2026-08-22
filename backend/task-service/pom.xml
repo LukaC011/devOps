@@ -11,8 +11,8 @@
 	<groupId>com.uris.crmhrm</groupId>
 	<artifactId>task-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>task-service</name>
+	<description>Upravljanje zadacima zaposlenih</description>
 	<url/>
 	<licenses>
 		<license/>

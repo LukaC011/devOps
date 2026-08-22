@@ -11,8 +11,8 @@
 	<groupId>com.uris.crmhrm</groupId>
 	<artifactId>api-gateway</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>api-gateway</name>
+	<description>Prosledjuje spoljne /api zahteve ka odgovarajucem servisu</description>
 	<url/>
 	<licenses>
 		<license/>
