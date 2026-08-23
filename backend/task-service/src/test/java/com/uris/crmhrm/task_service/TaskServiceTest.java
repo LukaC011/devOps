@@ -1,6 +1,7 @@
 package com.uris.crmhrm.task_service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -19,6 +20,9 @@ class TaskServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+
+    @Mock
+    private EmployeeClient employeeClient;
 
     @InjectMocks
     private TaskService taskService;
@@ -42,6 +46,7 @@ class TaskServiceTest {
     @Test
     void savesTaskWhenEmployeeExists() {
         TaskRequest request = new TaskRequest("Pripremi ponudu", "Ponuda za Delta", 1L);
+        given(employeeClient.employeeExists(1L)).willReturn(true);
         given(taskRepository.save(any(Task.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         Task created = taskService.create(request);
@@ -50,6 +55,17 @@ class TaskServiceTest {
         assertThat(created.getStatus()).isEqualTo(TaskStatus.NEW);
         assertThat(created.getCreatedAt()).isNotNull();
         assertThat(created.getDescription()).isEqualTo("Ponuda za Delta");
+    }
+
+    @Test
+    void rejectsTaskForUnknownEmployee() {
+        TaskRequest request = new TaskRequest("Pripremi ponudu", "Ponuda za Delta", 99L);
+        given(employeeClient.employeeExists(99L)).willReturn(false);
+
+        assertThatThrownBy(() -> taskService.create(request))
+                .isInstanceOf(UnknownEmployeeException.class);
+
+        verify(taskRepository, never()).save(any(Task.class));
     }
 
     @Test
