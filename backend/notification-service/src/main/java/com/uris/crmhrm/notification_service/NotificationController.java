@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/notifications")
 public class NotificationController {
 
-    private final NotificationStore notificationStore;
+    private final NotificationService notificationService;
 
-    public NotificationController(NotificationStore notificationStore) {
-        this.notificationStore = notificationStore;
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
     @GetMapping
     public List<Notification> getNotifications() {
-        return notificationStore.findAll();
+        return notificationService.findAll();
     }
 }

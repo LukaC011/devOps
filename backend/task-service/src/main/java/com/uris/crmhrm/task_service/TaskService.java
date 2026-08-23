@@ -1,29 +1,49 @@
 package com.uris.crmhrm.task_service;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TaskService {
 
-    private static final String INITIAL_STATUS = "NEW";
+    private final TaskRepository taskRepository;
 
-    private final Map<Long, Task> tasks = new ConcurrentHashMap<>();
-    private final AtomicLong idSequence = new AtomicLong();
-
-    public List<Task> findAll() {
-        return List.copyOf(tasks.values());
+    public TaskService(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository;
     }
 
+    public List<Task> findAll() {
+        return taskRepository.findAll();
+    }
+
+    public Optional<Task> findById(Long id) {
+        return taskRepository.findById(id);
+    }
+
+    @Transactional
     public Task create(TaskRequest request) {
-        long id = idSequence.incrementAndGet();
-        Task task = new Task(id, request.title(), request.description(), request.employeeId(),
-                INITIAL_STATUS, Instant.now());
-        tasks.put(id, task);
-        return task;
+        return taskRepository.save(new Task(request.title(), request.description(), request.employeeId()));
+    }
+
+    @Transactional
+    public Optional<Task> update(Long id, TaskUpdateRequest request) {
+        return taskRepository.findById(id).map(task -> {
+            task.setTitle(request.title());
+            task.setDescription(request.description());
+            task.setEmployeeId(request.employeeId());
+            task.setStatus(request.status());
+            return taskRepository.save(task);
+        });
+    }
+
+    @Transactional
+    public boolean deleteById(Long id) {
+        if (!taskRepository.existsById(id)) {
+            return false;
+        }
+        taskRepository.deleteById(id);
+        return true;
     }
 }
