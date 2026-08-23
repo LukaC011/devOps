@@ -3,57 +3,80 @@ package com.uris.crmhrm.client_service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-@WebMvcTest(ClientController.class)
+@WebFluxTest(ClientController.class)
 class ClientControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @MockitoBean
-    private ClientService clientService;
+    private ReactiveClientService reactiveClientService;
 
     @Test
-    void returnsAllClients() throws Exception {
-        given(clientService.findAll())
-                .willReturn(List.of(new Client("Delta Logistika", "office@delta-logistika.rs", "100200300")));
+    void returnsAllClients() {
+        given(reactiveClientService.findAll())
+                .willReturn(Flux.just(new Client("Delta Logistika", "office@delta-logistika.rs", "100200300")));
 
-        mockMvc.perform(get("/clients"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("Delta Logistika"));
+        webTestClient.get().uri("/clients")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(Client.class).hasSize(1);
     }
 
     @Test
-    void createsClient() throws Exception {
-        given(clientService.create(any()))
-                .willReturn(new Client("Nova Gradnja", "kontakt@novagradnja.rs", "100400500"));
+    void createsClient() {
+        given(reactiveClientService.create(any()))
+                .willReturn(Mono.just(new Client("Nova Gradnja", "kontakt@novagradnja.rs", "100400500")));
 
-        mockMvc.perform(post("/clients")
+        webTestClient.post().uri("/clients")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"Nova Gradnja\",\"email\":\"kontakt@novagradnja.rs\",\"taxNumber\":\"100400500\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.taxNumber").value("100400500"));
+                .bodyValue("{\"name\":\"Nova Gradnja\",\"email\":\"kontakt@novagradnja.rs\",\"taxNumber\":\"100400500\"}")
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.taxNumber").isEqualTo("100400500");
     }
 
     @Test
-    void returnsNotFoundForUnknownClient() throws Exception {
-        given(clientService.findById(eq(99L))).willReturn(Optional.empty());
+    void returnsNotFoundForUnknownClient() {
+        given(reactiveClientService.findById(eq(99L))).willReturn(Mono.empty());
 
-        mockMvc.perform(get("/clients/99"))
-                .andExpect(status().isNotFound());
+        webTestClient.get().uri("/clients/99")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void streamsClientsAsServerSentEvents() {
+        given(reactiveClientService.streamAll())
+                .willReturn(Flux.just(new Client("Panonija Soft", "info@panonijasoft.rs", "100600700")));
+
+        webTestClient.get().uri("/clients/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM);
+    }
+
+    @Test
+    void streamsClientsThroughRxJavaFlowable() {
+        given(reactiveClientService.streamAll())
+                .willReturn(Flux.just(new Client("Panonija Soft", "info@panonijasoft.rs", "100600700")));
+
+        webTestClient.get().uri("/clients/flowable")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM);
     }
 }
