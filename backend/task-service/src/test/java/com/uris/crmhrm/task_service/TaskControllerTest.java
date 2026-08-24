@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,5 +67,45 @@ class TaskControllerTest {
 
         mockMvc.perform(delete("/tasks/99"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void returnsTaskById() throws Exception {
+        given(taskService.findById(eq(1L)))
+                .willReturn(Optional.of(new Task("Pripremi ponudu", "Ponuda za Delta", 1L)));
+
+        mockMvc.perform(get("/tasks/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Pripremi ponudu"));
+    }
+
+    @Test
+    void updatesTask() throws Exception {
+        given(taskService.update(eq(1L), any()))
+                .willReturn(Optional.of(new Task("Zavrsi ponudu", "Finalna verzija", 1L)));
+
+        mockMvc.perform(put("/tasks/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Zavrsi ponudu\",\"description\":\"Finalna verzija\",\"employeeId\":1,\"status\":\"IN_PROGRESS\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Zavrsi ponudu"));
+    }
+
+    @Test
+    void returnsNotFoundWhenUpdatingUnknownTask() throws Exception {
+        given(taskService.update(eq(99L), any())).willReturn(Optional.empty());
+
+        mockMvc.perform(put("/tasks/99")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"x\",\"description\":\"y\",\"employeeId\":1,\"status\":\"DONE\"}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletesTask() throws Exception {
+        given(taskService.deleteById(eq(1L))).willReturn(true);
+
+        mockMvc.perform(delete("/tasks/1"))
+                .andExpect(status().isNoContent());
     }
 }

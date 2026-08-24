@@ -8,6 +8,14 @@
 	<packaging>pom</packaging>
 	<name>backend</name>
 
+	<properties>
+		<sonar.projectKey>LukaC011_devOps</sonar.projectKey>
+		<sonar.organization>luxuz123</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.exclusions>**/*Application.java</sonar.coverage.exclusions>
+	</properties>
+
 	<modules>
 		<module>api-gateway</module>
 		<module>employee-service</module>

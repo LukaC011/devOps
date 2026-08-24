@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -64,5 +65,45 @@ class EmployeeControllerTest {
 
         mockMvc.perform(delete("/employees/99"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void returnsEmployeeById() throws Exception {
+        given(employeeService.findById(eq(1L)))
+                .willReturn(Optional.of(new Employee("Mila", "Jovanovic", "HR Manager", "mila@crm.rs")));
+
+        mockMvc.perform(get("/employees/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("mila@crm.rs"));
+    }
+
+    @Test
+    void updatesEmployee() throws Exception {
+        given(employeeService.update(eq(1L), any()))
+                .willReturn(Optional.of(new Employee("Mila", "Jovanovic", "HR Director", "mila@crm.rs")));
+
+        mockMvc.perform(put("/employees/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"firstName\":\"Mila\",\"lastName\":\"Jovanovic\",\"position\":\"HR Director\",\"email\":\"mila@crm.rs\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.position").value("HR Director"));
+    }
+
+    @Test
+    void returnsNotFoundWhenUpdatingUnknownEmployee() throws Exception {
+        given(employeeService.update(eq(99L), any())).willReturn(Optional.empty());
+
+        mockMvc.perform(put("/employees/99")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"firstName\":\"X\",\"lastName\":\"Y\",\"position\":\"Z\",\"email\":\"x@crm.rs\"}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletesEmployee() throws Exception {
+        given(employeeService.deleteById(eq(1L))).willReturn(true);
+
+        mockMvc.perform(delete("/employees/1"))
+                .andExpect(status().isNoContent());
     }
 }
