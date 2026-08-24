@@ -10,10 +10,13 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final EmployeeClient employeeClient;
+    private final TaskEventPublisher taskEventPublisher;
 
-    public TaskService(TaskRepository taskRepository, EmployeeClient employeeClient) {
+    public TaskService(TaskRepository taskRepository, EmployeeClient employeeClient,
+            TaskEventPublisher taskEventPublisher) {
         this.taskRepository = taskRepository;
         this.employeeClient = employeeClient;
+        this.taskEventPublisher = taskEventPublisher;
     }
 
     public List<Task> findAll() {
@@ -29,7 +32,9 @@ public class TaskService {
         if (!employeeClient.employeeExists(request.employeeId())) {
             throw new UnknownEmployeeException(request.employeeId());
         }
-        return taskRepository.save(new Task(request.title(), request.description(), request.employeeId()));
+        Task created = taskRepository.save(new Task(request.title(), request.description(), request.employeeId()));
+        taskEventPublisher.publishTaskCreated(created);
+        return created;
     }
 
     @Transactional

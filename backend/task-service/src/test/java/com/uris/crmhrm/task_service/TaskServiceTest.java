@@ -24,6 +24,9 @@ class TaskServiceTest {
     @Mock
     private EmployeeClient employeeClient;
 
+    @Mock
+    private TaskEventPublisher taskEventPublisher;
+
     @InjectMocks
     private TaskService taskService;
 
@@ -55,6 +58,7 @@ class TaskServiceTest {
         assertThat(created.getStatus()).isEqualTo(TaskStatus.NEW);
         assertThat(created.getCreatedAt()).isNotNull();
         assertThat(created.getDescription()).isEqualTo("Ponuda za Delta");
+        verify(taskEventPublisher).publishTaskCreated(created);
     }
 
     @Test
@@ -66,6 +70,7 @@ class TaskServiceTest {
                 .isInstanceOf(UnknownEmployeeException.class);
 
         verify(taskRepository, never()).save(any(Task.class));
+        verify(taskEventPublisher, never()).publishTaskCreated(any(Task.class));
     }
 
     @Test
