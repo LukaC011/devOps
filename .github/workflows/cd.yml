@@ -10,24 +10,111 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - api-gateway
+          - employee-service
+          - client-service
+          - task-service
+          - notification-service
 
     steps:
       - name: Checkout kod
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Logovanje na GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build i Push Docker Image-a (Employee Service)
+      - name: Build i push (${{ matrix.service }})
         run: |
-          cd backend/employee-service
-          IMAGE_ID=ghcr.io/lukac011/employee-service
-          # Pretvara sva slova u mala zbog Docker pravila
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          IMAGE_ID=$(echo "ghcr.io/${{ github.repository_owner }}/${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t "$IMAGE_ID:latest" -t "$IMAGE_ID:${{ github.sha }}" "backend/${{ matrix.service }}"
+          docker push "$IMAGE_ID:latest"
+          docker push "$IMAGE_ID:${{ github.sha }}"
 
-          docker build -t $IMAGE_ID:latest .
-          docker push $IMAGE_ID:latest
+  post-deploy-check:
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    permissions:
+      contents: read
+      packages: read
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout kod
+        uses: actions/checkout@v4
+
+      - name: Logovanje na GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Priprema okruzenja
+        run: cp .env.example .env
+
+      - name: Podizanje objavljenih image-a
+        run: docker compose up -d --no-build --wait --wait-timeout 600
+
+      - name: Health check svih servisa
+        run: |
+          for entry in api-gateway:8080 employee-service:8081 client-service:8082 task-service:8083 notification-service:8084; do
+            name=${entry%%:*}
+            port=${entry##*:}
+            status=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$port/actuator/health")
+            echo "$name -> $status"
+            if [ "$status" != "200" ]; then
+              exit 1
+            fi
+          done
+
+      - name: Smoke test kroz gateway
+        run: |
+          employee=$(curl -s -X POST http://localhost:8080/api/employees \
+            -H 'Content-Type: application/json' \
+            -d '{"firstName":"Smoke","lastName":"Test","position":"QA","email":"smoke@crm.rs"}')
+          echo "employee: $employee"
+          employee_id=$(echo "$employee" | sed 's/.*"id":\([0-9]*\).*/\1/')
+
+          created=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/tasks \
+            -H 'Content-Type: application/json' \
+            -d "{\"title\":\"Smoke task\",\"description\":\"post deploy\",\"employeeId\":$employee_id}")
+          echo "POST /api/tasks -> $created"
+          if [ "$created" != "201" ]; then
+            exit 1
+          fi
+
+          missing=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/tasks \
+            -H 'Content-Type: application/json' \
+            -d '{"title":"Unknown","description":"no such employee","employeeId":999999}')
+          echo "POST /api/tasks sa nepostojecim zaposlenim -> $missing"
+          if [ "$missing" != "404" ]; then
+            exit 1
+          fi
+
+          for attempt in $(seq 1 15); do
+            notifications=$(curl -s http://localhost:8080/api/notifications)
+            if echo "$notifications" | grep -q "Smoke task"; then
+              echo "notifikacija stigla iz reda: $notifications"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "notifikacija se nije pojavila"
+          exit 1
+
+      - name: Logovi pri padu
+        if: failure()
+        run: docker compose logs --tail=120
+
+      - name: Gasenje stack-a
+        if: always()
+        run: docker compose down -v
