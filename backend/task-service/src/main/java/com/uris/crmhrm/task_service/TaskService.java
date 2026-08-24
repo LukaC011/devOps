@@ -9,9 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final EmployeeClient employeeClient;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, EmployeeClient employeeClient) {
         this.taskRepository = taskRepository;
+        this.employeeClient = employeeClient;
     }
 
     public List<Task> findAll() {
@@ -24,6 +26,9 @@ public class TaskService {
 
     @Transactional
     public Task create(TaskRequest request) {
+        if (!employeeClient.employeeExists(request.employeeId())) {
+            throw new UnknownEmployeeException(request.employeeId());
+        }
         return taskRepository.save(new Task(request.title(), request.description(), request.employeeId()));
     }
 

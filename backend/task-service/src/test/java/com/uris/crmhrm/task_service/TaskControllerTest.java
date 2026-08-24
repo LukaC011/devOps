@@ -70,6 +70,16 @@ class TaskControllerTest {
     }
 
     @Test
+    void returnsNotFoundWhenEmployeeDoesNotExist() throws Exception {
+        given(taskService.create(any())).willThrow(new UnknownEmployeeException(99L));
+
+        mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Pripremi ponudu\",\"description\":\"Ponuda za Delta\",\"employeeId\":99}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void returnsTaskById() throws Exception {
         given(taskService.findById(eq(1L)))
                 .willReturn(Optional.of(new Task("Pripremi ponudu", "Ponuda za Delta", 1L)));
