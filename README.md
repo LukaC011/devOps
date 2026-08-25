@@ -81,6 +81,10 @@ cp .env.example .env
 ./deploy.sh
 ```
 
+Na Windows-u, ako kloniranje prijavi `Filename too long`, uključi podršku za duge
+putanje jednom: `git config --global core.longpaths true`. Java paket struktura je
+dublja od podrazumevanog Windows ograničenja.
+
 `deploy.sh` builda i podiže sve kontejnere, sačeka da svaki prijavi `healthy`, zatim proveri
 `/actuator/health` na svih pet servisa i rutiranje kroz gateway. Skripta vraća neuspeh ako
 bilo koja provera ne prođe.
