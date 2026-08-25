@@ -181,6 +181,7 @@ initdb/                  SQL skripta koja kreira bazu po servisu
 docker-compose.yml       ceo sistem, sa healthcheck-ovima
 deploy.sh                lokalni deploy sa post-deploy proverom
 DOKUMENTACIJA.md         projektna dokumentacija po tačkama specifikacije
+DOKUMENTACIJA.docx       ista dokumentacija u Word formatu, za predaju
 ```
 
 ## Tehnologije
