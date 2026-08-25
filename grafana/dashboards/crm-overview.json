@@ -1,7 +1,10 @@
 {
   "uid": "crm-overview",
   "title": "CRM System Overview",
-  "tags": ["crm", "microservices"],
+  "tags": [
+    "crm",
+    "microservices"
+  ],
   "timezone": "browser",
   "schemaVersion": 39,
   "version": 1,
@@ -20,18 +23,36 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "s",
           "min": 0,
-          "custom": { "lineWidth": 2, "fillOpacity": 8 }
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
@@ -50,18 +71,36 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "reqps",
           "min": 0,
-          "custom": { "lineWidth": 2, "fillOpacity": 8 }
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
@@ -80,18 +119,36 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 9 },
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "percentunit",
           "min": 0,
-          "custom": { "lineWidth": 2, "fillOpacity": 8 }
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8
+          }
         },
         "overrides": []
       },
       "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
         {
